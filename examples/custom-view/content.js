@@ -8,23 +8,33 @@ InboxSDK.load(2, 'sdk_newstud_7bb12ef34f').then(function (sdk) {
 	const routes = [
 		{
 			routeID: 'ts-task',
-			name: 'Task',
+			name: 'TASK',
 			iconUrl: {
-				lightTheme: chrome.runtime.getURL('monkey-face.jpg'),
-				darkTheme: chrome.runtime.getURL('monkey-face.jpg'),
+				lightTheme: chrome.runtime.getURL('assets/svg/tasks_black.svg'),
+				darkTheme: chrome.runtime.getURL('assets/svg/tasks.svg'),
 			},
 			src: 'http://localhost:3000/',
 			isRouteActive: (route) => route.routeID === 'ts-task',
 		},
 		{
 			routeID: 'ts-crm',
-			name: 'Crm',
+			name: 'CRM',
 			iconUrl: {
-				lightTheme: chrome.runtime.getURL('monkey-face.jpg'),
-				darkTheme: chrome.runtime.getURL('monkey-face.jpg'),
+				lightTheme: chrome.runtime.getURL('assets/svg/crm_black.svg'),
+				darkTheme: chrome.runtime.getURL('assets/svg/crm.svg'),
 			},
-			src: 'https://vueuse.org/',
+			src: 'http://localhost:3000/crm/login',
 			isRouteActive: (route) => route.routeID === 'ts-crm',
+		},
+		{
+			routeID: 'ts-okr',
+			name: 'OKR',
+			iconUrl: {
+				lightTheme: chrome.runtime.getURL('assets/svg/okr_black.svg'),
+				darkTheme: chrome.runtime.getURL('assets/svg/okr.svg'),
+			},
+			src: 'http://localhost:3000/okr/login',
+			isRouteActive: (route) => route.routeID === 'ts-okr',
 		}
 	];
 	

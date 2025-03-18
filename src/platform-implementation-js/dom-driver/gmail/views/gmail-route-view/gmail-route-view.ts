@@ -38,6 +38,7 @@ class GmailRouteView implements RouteViewDriver {
   _rowListViews: GmailRowListView[];
   _gmailRouteProcessor: GmailRouteProcessor;
   #driver: GmailDriver;
+  private static _globalCreatedRoutes: { routeID: string; customViewElement: HTMLElement }[] = [];
   _eventStream: Bus<
     | { eventName: 'newGmailRowListView'; view: GmailRowListView }
     | {
@@ -73,7 +74,7 @@ class GmailRouteView implements RouteViewDriver {
     this.#page = makePageParser(document.body, driver.getLogger());
 
     if (this._type === 'CUSTOM') {
-      this._setupCustomViewElement();
+		this._setupCustomViewElement(routeID);
 
       driver
         .getStopper()
@@ -107,29 +108,30 @@ class GmailRouteView implements RouteViewDriver {
   }
 
   destroy() {
-    this.#destroyed = true;
+	this.#destroyed = true;
 
-    this._stopper.destroy();
+	this._stopper.destroy();
 
-    this._eventStream.end();
-    this.#page.dump();
+	this._eventStream.end();
+	this.#page.dump();
 
-    if (this._customViewElement) {
-      this._customViewElement.remove();
-    }
+	// Instead of removing the custom view element, hide it
+	if (this._customViewElement) {
+		this._customViewElement.style.display = 'none';
+	}
 
-    var rowListViews = this._rowListViews;
-    this._rowListViews = [];
-    rowListViews.forEach((view) => {
-      view.destroy();
-    });
+	// Destroy row list views and thread view as usual
+	var rowListViews = this._rowListViews;
+	this._rowListViews = [];
+	rowListViews.forEach((view) => {
+		view.destroy();
+	});
 
-    if (this._threadView) {
-      this._threadView.destroy();
-
-      this._threadView = null;
-    }
-  }
+	if (this._threadView) {
+		this._threadView.destroy();
+		this._threadView = null;
+	}
+}
 
   getHash(): string {
     return this._hash;
@@ -281,15 +283,38 @@ class GmailRouteView implements RouteViewDriver {
       });
   }
 
-  _setupCustomViewElement() {
-    this._customViewElement = document.createElement('div');
+  _setupCustomViewElement(routeID: string) {
+	const existingRoute = GmailRouteView._globalCreatedRoutes.find(
+		route => route.routeID === routeID
+	);
 
-    this._customViewElement.classList.add('inboxsdk__custom_view_element');
+	if (existingRoute) {
+		existingRoute.customViewElement.style.display = '';
+		const contentSectionElement = GmailElementGetter.getContentSectionElement();
+		
+		if (contentSectionElement) {
+			const viewElements = contentSectionElement.querySelectorAll('.inboxsdk__custom_view .inboxsdk__custom_view_element');
+			viewElements.forEach(element => {
+				if (element !== existingRoute.customViewElement) {
+					(element as HTMLElement).style.display = 'none';
+				}
+			});
+		}
 
-    this._monitorLeftNavHeight();
+	} else {
+		this._customViewElement = document.createElement('div');
+		this._customViewElement.classList.add('inboxsdk__custom_view_element');
+		this._customViewElement.classList.add(routeID);
 
-    this._setCustomViewElementHeight();
-  }
+		this._monitorLeftNavHeight();
+		this._setCustomViewElementHeight();
+
+		GmailRouteView._globalCreatedRoutes.push({
+			routeID: routeID,
+			customViewElement: this._customViewElement,
+		});
+	}
+}
 
   _monitorLeftNavHeight() {
     var leftNav = GmailElementGetter.getLeftNavHeightElement();
