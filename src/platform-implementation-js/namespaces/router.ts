@@ -247,15 +247,33 @@ class Router {
 
     if (relevantCustomRoute) {
       const customRouteView = new CustomRouteView(routeViewDriver);
-      if(!customRouteView) return;
       const customViewElement = routeViewDriver.getCustomViewElement();
-      if (!customViewElement) return;
-      this.#driver.showCustomRouteView(customViewElement);
+      var customRoutes = document.getElementsByClassName(
+        'inboxsdk__custom_view_element',
+      ) as HTMLCollection;
+      for (var i = 0; i < customRoutes.length; i++) {
+        (customRoutes[i] as HTMLElement).style.display = 'none';
+      }
+      var currentRoute = document.getElementsByClassName(
+        `inboxsdk__custom_view_element ${relevantCustomRoute.routeID}`,
+      )[0] as HTMLElement;
+      if (currentRoute !== undefined) {
+        var mainview = document.getElementsByClassName(
+          'inboxsdk__custom_view',
+        )[0] as HTMLElement;
+        const previousElement = mainview.previousSibling as HTMLElement;
+        previousElement.style.display = 'none';
+      }
 
-      try {
-        relevantCustomRoute.onActivate(customRouteView);
-      } catch (err) {
-        this.#driver.getLogger().error(err);
+      if (!customViewElement) {
+        currentRoute.style.display = 'block';
+      } else {
+        this.#driver.showCustomRouteView(customViewElement);
+        try {
+          relevantCustomRoute.onActivate(customRouteView);
+        } catch (err) {
+          this.#driver.getLogger().error(err);
+        }
       }
     }
   }
