@@ -50,12 +50,14 @@ InboxSDK.load(2, 'sdk_newstud_7bb12ef34f').then(function (sdk) {
 
     sdk.Router.handleCustomRoute(route.routeID, function (customRouteView) {
       const container = customRouteView.getElement();
-      const iframe = document.createElement('iframe');
-      iframe.src = route.src;
-      iframe.style.height = '100%';
-      iframe.style.width = '100%';
-      iframeCache[route.routeID] = iframe;
-      container.appendChild(iframe);
+      if (!iframeCache[route.routeID]) {
+        const iframe = document.createElement('iframe');
+        iframe.src = route.src;
+        iframe.style.height = '100%';
+        iframe.style.width = '100%';
+        iframeCache[route.routeID] = iframe;
+        container.appendChild(iframe);
+      }
     });
   }
 });
